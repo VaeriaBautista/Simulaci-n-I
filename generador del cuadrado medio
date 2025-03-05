@@ -1,0 +1,77 @@
+import tabulate
+
+def cuadrados_medios(semilla_inicial, cantidad_maxima):
+    """
+    Genera números pseudoaleatorios utilizando el método de cuadrados medios.
+    
+    Args:
+    semilla_inicial (int): Número inicial
+    cantidad_maxima (int): Número máximo de intentos de generación
+    
+    Returns:
+    tuple: Lista de detalles de generación y motivo de detención
+    """
+    detalles_generacion = []
+    semillas_usadas = set()
+    semilla = semilla_inicial
+    
+    for iteracion in range(cantidad_maxima):
+        # Elevar al cuadrado la semilla
+        cuadrado = semilla ** 2
+        
+        # Convertir a cadena y rellenar con ceros a la izquierda
+        cuadrado_str = str(cuadrado).zfill(8)
+        
+        # Extraer los 4 números centrales según sea impar o par el número de dígitos
+        if len(cuadrado_str) % 2 == 1:  # Número de dígitos impar
+            # Dejar el primer dígito y tomar los siguientes 4 como centrales
+            semilla = int(cuadrado_str[1:5])
+        else:  # Número de dígitos par
+            # Tomar los 4 dígitos exactamente del centro
+            inicio = (len(cuadrado_str) - 4) // 2
+            semilla = int(cuadrado_str[inicio:inicio+4])
+        
+        # Condición 1: Detener si los 4 números centrales son cero
+        if semilla == 0:
+            return detalles_generacion, "Detenido: Semilla se convirtió en cero"
+        
+        # Condición 2: A partir de la segunda iteración, detener si la semilla se repite
+        if iteracion > 0 and semilla in semillas_usadas:
+            return detalles_generacion, f"Detenido: Semilla {semilla} repetida"
+        
+        # Añadir la semilla al conjunto de semillas usadas
+        semillas_usadas.add(semilla)
+        
+        # Preparar detalles de la iteración
+        detalle = {
+            'Iteración': iteracion + 1,
+            'Semilla': semilla,
+            'Semilla al Cuadrado': cuadrado
+        }
+        
+        # Añadir a la lista de detalles
+        detalles_generacion.append(detalle)
+    
+    return detalles_generacion, "Detenido: Alcanzado número máximo de iteraciones"
+
+# Ejemplo de uso
+def main():
+    # Semilla inicial de 4 dígitos
+    semilla_inicial = 1234
+    
+    # Generar números aleatorios con límite de 20 iteraciones
+    detalles, razon = cuadrados_medios(semilla_inicial, 20)
+    
+    # Generar tabla de detalles
+    print("Tabla de Generación de Números Pseudoaleatorios:")
+    print(tabulate.tabulate(
+        detalles, 
+        headers="keys", 
+        tablefmt="grid"
+    ))
+    
+    print("\n" + razon)
+
+# Ejecutar el ejemplo
+if __name__ == "__main__":
+    main()
